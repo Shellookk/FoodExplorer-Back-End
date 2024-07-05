@@ -6,7 +6,7 @@ class UsersController{
     async create(request, response){
         const { name, email, password } = request.body
         const database = await sqliteConnection()
-        const checkUserExists = await database.get("SELECT * FROM users WHERE email = (?)", [email])
+        const checkUserExists = await database.get("SELECT * FROM users WHERE lower(email) = lower(?)", [email])
 
         if (!name || !email || !password){
             throw new AppError("Preencha os campos obrigatório!")
@@ -18,10 +18,9 @@ class UsersController{
 
         const hashedPassword = await hash(password, 8)
         
-        await database.run("INSERT INTO users (name, email, password) VALUES (?, ?, ?)" [name, email, hashedPassword])
+        await database.run("INSERT INTO users (name, email, password) VALUES (?, lower(?), ?)", [name, email, hashedPassword])
 
-
-        response.status(201).json({ name, email, password })
+        response.status(201).json()
     }
 
     async update(request, response){
@@ -69,6 +68,12 @@ class UsersController{
 
         return response.status(200).json()
     }
+
+    async delete(request, response){
+        const { name, email, password, role } = request.body
+        const { id } = request.params
+    }
+
 }
 
 module.exports = UsersController
