@@ -28,12 +28,8 @@ class SessionsController{
             expiresIn
         })
 
-
-
         return response.json({user, token})
-
     }
-
 }
 
 module.exports = SessionsController
