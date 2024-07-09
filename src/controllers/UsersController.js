@@ -20,7 +20,7 @@ class UsersController{
         
         await database.run("INSERT INTO users (name, email, password) VALUES (?, lower(?), ?)", [name, email, hashedPassword])
 
-        response.status(201).json()
+        return response.status(201).json()
     }
 
     async update(request, response){
