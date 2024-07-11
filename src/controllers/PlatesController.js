@@ -33,7 +33,7 @@ class PlatesController{
 
         await knex("ingredients_plate").insert(ingredientsPlateInsert)
 
-        return response.status(201).json({ingredientsPlateInsert})
+        return response.status(201).json({name, avatar, category, price, description, ingredients})
     }
 
     async update(request, response){
