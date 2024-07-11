@@ -1,41 +1,45 @@
-const knex = require("knex")
-const { select } = require("../database/knex")
+const knex = require('../database/knex');
+const AppError = require("../utils/AppError")
 class PlatesController{
     async create(request, response){
         const { name, avatar, category, price, description, ingredients } = request.body
         
-        if (!name || !category || !price || !description){
+        if (!name || !price || !description){
             throw new AppError("Preencha os campos obrigatório!")
         }
         
-        const [plat_id] = await knex("plates").insert({
+        const [plate_id] = await knex("plates").insert({
             name,
             avatar,
             category,
             price,
-            description,
+            description
         })
 
         const ingredientsInsert = ingredients.map(name =>{
             return{
-                name : name
+                name : name,
             }
-        })
+        });
 
-        const [ingredients_id] = await knex("ingredients").insert(ingredientsInsert)
+        const ingredients_ids = await knex("ingredients").insert(ingredientsInsert).returning("id");
 
-        await knex("ingredients_plate").insert({
-            plat_id,
-            ingredients_id
-        })
 
-        return response.status(201).json()
+        const ingredientsPlateInsert = ingredients_ids.map(ingredient_id => ({
+        
+            plate_id,
+            ingredient_id: ingredient_id.id    
+        }))
+
+        await knex("ingredients_plate").insert(ingredientsPlateInsert)
+
+        return response.status(201).json({ingredientsPlateInsert})
     }
 
     async update(request, response){
         const { name, avatar, category, price, description, ingredients } = request.body
         const plate_id = request.plate.id
-        const plate = await knex('plates').where('id', plate_id)
+        const plate = await knex('plates').where({plate_id}).first()
 
         if(!plate){
             throw new AppError("Produto não encontrado!")

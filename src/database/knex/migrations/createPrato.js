@@ -1,11 +1,10 @@
 exports.up = knex => knex.schema.createTable("plates", table =>{
     table.increments("id")
     table.text("name").notNullable()
-    table.text("avatar")
+    table.text("avatar").default(null)
     table
-    .enu("category", ["refeicao", "sobremesa", "bebida"], {useNative: true, enumName: "categoria" })
+    .enu("category", ["refeicao", "sobremesa", "bebida"], {useNative: true, enumName: "category" })
     .notNullable().default("refeicao", options={})
-
     table.float("price").notNullable()
     table.text("description").notNullable()
 
