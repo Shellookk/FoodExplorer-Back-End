@@ -69,10 +69,6 @@ class UsersController{
         return response.status(200).json()
     }
 
-    async delete(request, response){
-        const { id } = request.params
-    }
-
 }
 
 module.exports = UsersController
