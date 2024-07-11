@@ -70,7 +70,6 @@ class UsersController{
     }
 
     async delete(request, response){
-        const { name, email, password, role } = request.body
         const { id } = request.params
     }
 
