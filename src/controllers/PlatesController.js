@@ -3,75 +3,114 @@ const AppError = require("../utils/AppError")
 
 class PlatesController{
     async create(request, response){
-        const { name, avatar, category, price, description, ingredients } = request.body
-        
-        if (!name || !price || !description){
-            throw new AppError("Preencha os campos obrigatório!")
+        const { name, avatar, category, price, description, ingredients } = request.body;
+
+        // Verifica se os campos obrigatórios estão presentes
+        if (!name || !price || !description) {
+            throw new AppError("Preencha os campos obrigatórios!");
         }
         
-        const [plate_id] = await knex("plates").insert({
-            name,
-            avatar,
-            category,
-            price,
-            description
-        })
-
-        const ingredientsInsert = ingredients.map(name =>{
-            return{
-                name : name,
-            }
-        });
-
-        const ingredients_ids = await knex("ingredients").insert(ingredientsInsert).returning("id");
-
-        const ingredientsPlateInsert = ingredients_ids.map(ingredient_id => ({
+        // Transforma os dados em caixa baixa
+        const lowerCaseData = {
+            name: name.toLowerCase(),
+            avatar: avatar.toLowerCase(),
+            category: category.toLowerCase(),
+            price: price,
+            description: description.toLowerCase()
+        };
         
-            plate_id,
-            ingredient_id: ingredient_id.id    
-        }))
-
-        await knex("ingredients_plate").insert(ingredientsPlateInsert)
-
-        return response.status(201).json({name, avatar, category, price, description, ingredients})
-    }
+        // Insere os dados na tabela plates
+        const [plate_id] = await knex("plates").insert(lowerCaseData);
+        
+        // Verifica se o array de ingredientes não está vazio
+        if (ingredients && ingredients.length > 0) {
+            // Transforma os ingredientes em caixa baixa
+            const ingredientsInsert = ingredients.map(name => ({
+                name: name.toLowerCase()
+            }));
+        
+            const ingredients_ids = await knex("ingredients").insert(ingredientsInsert).returning("id");
+        
+            const ingredientsPlateInsert = ingredients_ids.map(ingredient => ({
+                plate_id,
+                ingredient_id: ingredient.id // Corrige o acesso ao id do ingrediente
+            }));
+        
+            await knex("ingredients_plate").insert(ingredientsPlateInsert);
+        }
+        
+        return response.status(201).json({ plate_id, ingredients });
+    }        
 
     async update(request, response) {
-        const { name, category, price, description, ingredients } = request.body
-        const { id } = request.params
-        const plate = await knex('plates').where({ id }).first()
-        const Searchingredient = await knex('ingredients_plate as ip')
-        .innerJoin('plates as p', 'p.id', 'ip.plate_id')
-        .innerJoin('ingredients as i', 'i.id', 'ip.ingredient_id')
-        .select('i.name as ingredient_name')
-        .where('p.id', id)
-
-        const existingIngredients = Searchingredient.map(ingredient => ingredient.ingredient_name)
-
-        if (ingredients.length > 0) {
-            const uniqueIngredients = ingredients.filter(ingredient => !existingIngredients.includes(ingredient))
-            console.log(uniqueIngredients);
-        }
-
+        const { name, category, price, description, ingredients } = request.body;
+        const { id } = request.params;
+    
         if (!id) {
             throw new AppError("ID do prato não fornecido!", 400);
         }
+    
+        const plate = await knex('plates').where({ id }).first();
+    
         if (!plate) {
-            throw new AppError("Produto não encontrado!", 400)
+            throw new AppError("Produto não encontrado!", 400);
         }
     
         const updatedPlate = {
-            name: name ?? plate.name,
-            category: category ?? plate.category,
+            name: name ? name.toLowerCase() : plate.name,
+            category: category ? category.toLowerCase() : plate.category,
             price: price ?? plate.price,
-            description: description ?? plate.description,
+            description: description ? description.toLowerCase() : plate.description,
             updated_at: new Date()
         };
     
-        await knex('plates').where({ id }).update(updatedPlate)
+        await knex('plates').where({ id }).update(updatedPlate);
     
-        return response.status(200).json(updatedPlate)
-    }
+        // Atualização dos ingredientes
+        const existingIngredients = await knex('ingredients_plate as ip')
+            .innerJoin('plates as p', 'p.id', 'ip.plate_id')
+            .innerJoin('ingredients as i', 'i.id', 'ip.ingredient_id')
+            .select('i.name as ingredient_name')
+            .where('p.id', id)            
+    
+        if (ingredients && ingredients.length > 0) {
+            // Ingredientes únicos que não estão na lista existente
+            const uniqueIngredients = ingredients.filter(ingredient => !existingIngredients.includes(ingredient.toLowerCase()));
+    
+            if (uniqueIngredients.length > 0) {
+                // Transformar os ingredientes para caixa baixa
+                const ingredientsInsert = uniqueIngredients.map(name => ({
+                    name: name.toLowerCase()
+                }));
+    
+                const ingredients_ids = await knex("ingredients").insert(ingredientsInsert).returning("id");
+    
+                const ingredientsPlateInsert = ingredients_ids.map(ingredient => ({
+                    plate_id: id,
+                    ingredient_id: ingredient.id
+                }));
+    
+                await knex("ingredients_plate").insert(ingredientsPlateInsert);
+            }
+            
+            // Remove ingredientes que não estão mais associados ao prato
+            /*
+            const ingredientsToRemove = existingIngredients.filter(ingredient => !ingredients.includes(ingredient.toLowerCase()));
+            if (ingredientsToRemove.length > 0) {
+                await knex('ingredients_plate')
+                    .whereIn('ingredient_id', function() {
+                        this.select('id')
+                            .from('ingredients')
+                            .whereIn('name', ingredientsToRemove);
+                    })
+                    .andWhere('plate_id', id)
+                    .del();
+            }
+            */
+        }
+    
+        return response.status(200).json(updatedPlate);
+    }    
 
     async delete(){
 
