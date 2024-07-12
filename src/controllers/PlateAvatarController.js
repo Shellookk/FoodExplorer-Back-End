@@ -25,7 +25,7 @@ class PlateAvatarController{
             
         await knex("plates").update(plate).where({ id: plate_id })
 
-        return response.json(plate)
+        return response.json(filename)
     }
 }
 

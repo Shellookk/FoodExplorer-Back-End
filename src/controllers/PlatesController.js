@@ -36,33 +36,31 @@ class PlatesController{
         return response.status(201).json({name, avatar, category, price, description, ingredients})
     }
 
-    async update(request, response){
-        const { name, avatar, category, price, description, ingredients } = request.body
-        const plate_id = request.plate.id
-        const plate = await knex('plates').where({plate_id}).first()
-
-        if(!plate){
-            throw new AppError("Produto não encontrado!")
+    async update(request, response) {
+        const { name, category, price, description } = request.body
+        const { id } = request.params
+        const plate = await knex('plates').where({ id }).first()
+    
+        if (!id) {
+            throw new AppError("ID do prato não fornecido!", 400);
         }
-
-        plate.name = name ?? plate.name
-        plate.avatar = name ?? plate.avatar
-        plate.category = name ?? plate.category
-        plate.price = name ?? plate.price
-        plate.description = name ?? plate.description
-        plate.ingredients = name ?? plate.ingredients
-
-        await knex.insert({
-            name,
-            avatar,
-            category,
-            price,
-            description,
-            ingredients
-        })
-
-        return response.status(200).json()
+        if (!plate) {
+            throw new AppError("Produto não encontrado!", 400)
+        }
+    
+        const updatedPlate = {
+            name: name ?? plate.name,
+            category: category ?? plate.category,
+            price: price ?? plate.price,
+            description: description ?? plate.description,
+            updated_at: new Date()
+        };
+    
+        await knex('plates').where({ id }).update(updatedPlate);
+    
+        return response.status(200).json(updatedPlate);
     }
+    
 }
 
 module.exports = PlatesController
