@@ -1,5 +1,6 @@
 const knex = require('../database/knex');
 const AppError = require("../utils/AppError")
+
 class PlatesController{
     async create(request, response){
         const { name, avatar, category, price, description, ingredients } = request.body
@@ -24,7 +25,6 @@ class PlatesController{
 
         const ingredients_ids = await knex("ingredients").insert(ingredientsInsert).returning("id");
 
-
         const ingredientsPlateInsert = ingredients_ids.map(ingredient_id => ({
         
             plate_id,
@@ -37,10 +37,22 @@ class PlatesController{
     }
 
     async update(request, response) {
-        const { name, category, price, description } = request.body
+        const { name, category, price, description, ingredients } = request.body
         const { id } = request.params
         const plate = await knex('plates').where({ id }).first()
-    
+        const Searchingredient = await knex('ingredients_plate as ip')
+        .innerJoin('plates as p', 'p.id', 'ip.plate_id')
+        .innerJoin('ingredients as i', 'i.id', 'ip.ingredient_id')
+        .select('i.name as ingredient_name')
+        .where('p.id', id)
+
+        const existingIngredients = Searchingredient.map(ingredient => ingredient.ingredient_name)
+
+        if (ingredients.length > 0) {
+            const uniqueIngredients = ingredients.filter(ingredient => !existingIngredients.includes(ingredient))
+            console.log(uniqueIngredients);
+        }
+
         if (!id) {
             throw new AppError("ID do prato não fornecido!", 400);
         }
@@ -56,11 +68,22 @@ class PlatesController{
             updated_at: new Date()
         };
     
-        await knex('plates').where({ id }).update(updatedPlate);
+        await knex('plates').where({ id }).update(updatedPlate)
     
-        return response.status(200).json(updatedPlate);
+        return response.status(200).json(updatedPlate)
     }
-    
+
+    async delete(){
+
+    }
+
+    async index(){
+
+    }
+
+    async show(){
+
+    }
 }
 
 module.exports = PlatesController
