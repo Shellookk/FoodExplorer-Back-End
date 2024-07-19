@@ -16,7 +16,8 @@ platesRoutes.use(ensureAuthenticated)
 
 
 platesRoutes.post("/", verifyUserAuthorization(["admin"]), platesController.create)
+platesRoutes.get("/", verifyUserAuthorization(["admin", "customer"]) , platesController.index)
 platesRoutes.put("/:id", verifyUserAuthorization(["admin"]), platesController.update)
 platesRoutes.patch("/:id/avatar", verifyUserAuthorization(["admin"]), upload.single("avatar"), plateAvatarController.update)
-
+platesRoutes.get("/:id", verifyUserAuthorization(["admin", "customer"]) , platesController.show)
 module.exports = platesRoutes

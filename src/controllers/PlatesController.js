@@ -108,17 +108,25 @@ class PlatesController{
     
         return response.status(200).json(updatedPlate);
     }    
-
+    //Remover pratos
     async delete(){
 
     }
+    //mostrar todos os pratos
+    async index(request, response){
+        const { id, name, category, price, description, ingredients, avatar } = request.body;
 
-    async index(){
+        return response.status(201).json({ });
 
     }
+    // visualizar somente um prato
+    async show(request, response){
+        const { name, category, price, description, ingredients, avatar } = request.body;
+        const { id } = request.params; 
 
-    async show(){
 
+
+        return response.status(201).json({ });
     }
 }
 
