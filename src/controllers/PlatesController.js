@@ -116,7 +116,7 @@ class PlatesController{
     async index(request, response){
         const { id, name, category, price, description, ingredients, avatar } = request.body;
 
-        return response.status(201).json({ });
+        return response.status(200).json({ });
 
     }
     // visualizar somente um prato
@@ -126,7 +126,7 @@ class PlatesController{
 
 
 
-        return response.status(201).json({ });
+        return response.status(200).json({ });
     }
 }
 
