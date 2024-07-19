@@ -117,7 +117,6 @@ class PlatesController{
         const { id, name, category, price, description, ingredients, avatar } = request.body;
 
         return response.status(200).json({ });
-
     }
     // visualizar somente um prato
     async show(request, response){
