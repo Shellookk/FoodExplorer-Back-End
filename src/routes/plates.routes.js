@@ -15,9 +15,9 @@ const plateAvatarController = new PlateAvatarController()
 platesRoutes.use(ensureAuthenticated)
 
 
-platesRoutes.post("/", verifyUserAuthorization(["admin"]), platesController.create)
-platesRoutes.get("/", verifyUserAuthorization(["admin", "customer"]) , platesController.index)
-platesRoutes.put("/:id", verifyUserAuthorization(["admin"]), platesController.update)
-platesRoutes.patch("/:id/avatar", verifyUserAuthorization(["admin"]), upload.single("avatar"), plateAvatarController.update)
-platesRoutes.get("/:id", verifyUserAuthorization(["admin", "customer"]) , platesController.show)
+platesRoutes.post("/", verifyUserAuthorization(["admin"]), platesController.create) // Criar pratos
+platesRoutes.get("/", verifyUserAuthorization(["admin", "customer"]) , platesController.index) // Visualizar todos os pratos
+platesRoutes.put("/:id", verifyUserAuthorization(["admin"]), platesController.update) // Atualizar prato
+platesRoutes.patch("/:id/avatar", verifyUserAuthorization(["admin"]), upload.single("avatar"), plateAvatarController.update) // Atualizar foto
+platesRoutes.get("/:id", verifyUserAuthorization(["admin", "customer"]) , platesController.show) // Mostrar somente um prato
 module.exports = platesRoutes

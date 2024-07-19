@@ -53,7 +53,7 @@ class PlatesController{
         const plate = await knex('plates').where({ id }).first();
     
         if (!plate) {
-            throw new AppError("Produto não encontrado!", 400);
+            throw new AppError("Produto não encontrado!", 404);
         }
     
         const updatedPlate = {
@@ -116,16 +116,19 @@ class PlatesController{
     async index(request, response){
         const { id, name, category, price, description, ingredients, avatar } = request.body;
 
-        return response.status(200).json({ });
+        return response.status(200).json({});
     }
     // visualizar somente um prato
     async show(request, response){
         const { name, category, price, description, ingredients, avatar } = request.body;
         const { id } = request.params; 
+        const plate = await knex('plates').where({ id }).first();
+    
+        if (!plate) {
+            throw new AppError("Produto não encontrado!", 404);
+        }
 
-
-
-        return response.status(200).json({ });
+        return response.status(200).json({});
     }
 }
 
