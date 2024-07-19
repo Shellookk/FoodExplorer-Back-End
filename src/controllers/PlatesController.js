@@ -114,7 +114,13 @@ class PlatesController{
     }
     //mostrar todos os pratos
     async index(request, response){
-        const { id, name, category, price, description, ingredients, avatar } = request.body;
+        const plates = await knex('plates').orderBy('category', 'asc');
+    
+        const ingredients = await knex('ingredients_plate as ip')
+            .innerJoin('plates as p', 'p.id', 'ip.plate_id')
+            .innerJoin('ingredients as i', 'i.id', 'ip.ingredient_id')
+            .select('i.name as name')
+            .where('p.id', id) 
 
         return response.status(200).json({});
     }
