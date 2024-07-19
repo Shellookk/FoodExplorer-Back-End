@@ -120,7 +120,6 @@ class PlatesController{
     }
     // visualizar somente um prato
     async show(request, response){
-        const { name, category, price, description, ingredients, avatar } = request.body;
         const { id } = request.params; 
         const plate = await knex('plates').where({ id }).first();
     
@@ -128,7 +127,13 @@ class PlatesController{
             throw new AppError("Produto não encontrado!", 404);
         }
 
-        return response.status(200).json({});
+        const ingredients = await knex('ingredients_plate as ip')
+            .innerJoin('plates as p', 'p.id', 'ip.plate_id')
+            .innerJoin('ingredients as i', 'i.id', 'ip.ingredient_id')
+            .select('i.name as name')
+            .where('p.id', id) 
+
+        return response.status(200).json({plate, ingredients});
     }
 }
 
