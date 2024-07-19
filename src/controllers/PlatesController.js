@@ -91,10 +91,8 @@ class PlatesController{
                 }));
     
                 await knex("ingredients_plate").insert(ingredientsPlateInsert);
-            }
-            
+            }            
             // Remove ingredientes que não estão mais associados ao prato
-            /*
             const ingredientsToRemove = existingIngredients.filter(ingredient => !ingredients.includes(ingredient.toLowerCase()));
             if (ingredientsToRemove.length > 0) {
                 await knex('ingredients_plate')
@@ -106,7 +104,6 @@ class PlatesController{
                     .andWhere('plate_id', id)
                     .del();
             }
-            */
         }
     
         return response.status(200).json(updatedPlate);
