@@ -18,6 +18,7 @@ platesRoutes.use(ensureAuthenticated)
 platesRoutes.post("/", verifyUserAuthorization(["admin"]), platesController.create) // Criar pratos
 platesRoutes.get("/", verifyUserAuthorization(["admin", "customer"]) , platesController.index) // Visualizar todos os pratos
 platesRoutes.put("/:id", verifyUserAuthorization(["admin"]), platesController.update) // Atualizar prato
+platesRoutes.delete("/:id", verifyUserAuthorization(["admin"]), platesController.delete) // Deletar prato
 platesRoutes.patch("/:id/avatar", verifyUserAuthorization(["admin"]), upload.single("avatar"), plateAvatarController.update) // Atualizar foto
 platesRoutes.get("/:id", verifyUserAuthorization(["admin", "customer"]) , platesController.show) // Mostrar somente um prato
 module.exports = platesRoutes

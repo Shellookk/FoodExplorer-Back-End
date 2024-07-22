@@ -109,8 +109,17 @@ class PlatesController{
     
         return response.status(200).json(updatedPlate);
     }    
-    //Remover pratos
-    async delete(){
+    //Deleta pratos
+    async delete(request, response){
+        const { id } = request.params
+
+        if (!id) {
+            throw new AppError("ID do prato não fornecido!", 400);
+        }
+
+        await knex("plates").where({ id }).delete()
+
+        return response.status(200).json()
 
     }
     //mostrar todos os pratos
