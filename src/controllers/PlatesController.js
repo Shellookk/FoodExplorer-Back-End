@@ -2,6 +2,7 @@ const knex = require('../database/knex');
 const AppError = require("../utils/AppError")
 
 class PlatesController{
+    //Criar Pratos
     async create(request, response){
         const { name, avatar, category, price, description, ingredients } = request.body;
 
@@ -41,7 +42,7 @@ class PlatesController{
         
         return response.status(201).json({ plate_id, ingredients });
     }        
-
+    //Atualizar Pratos
     async update(request, response) {
         const { name, category, price, description, ingredients } = request.body;
         const { id } = request.params;
@@ -119,10 +120,22 @@ class PlatesController{
         const ingredients = await knex('ingredients_plate as ip')
             .innerJoin('plates as p', 'p.id', 'ip.plate_id')
             .innerJoin('ingredients as i', 'i.id', 'ip.ingredient_id')
-            .select('i.name as name')
-            .where('p.id', id) 
+            .select('ip.plate_id', 'i.name');
 
-        return response.status(200).json({});
+            if (!plates || !ingredients) {
+                throw new AppError("Produtos não encontrado!", 404);
+            }
+
+        const platesWithIngredients = plates.map(plate => {
+            const plateIngredients = ingredients.filter(ingredient => ingredient.plate_id === plate.id).map(ingredient => ingredient.name);  
+
+            return {
+                ...plate,
+                ingredients: plateIngredients
+            };
+        });      
+
+        return response.status(200).json(platesWithIngredients);
     }
     // visualizar somente um prato
     async show(request, response){
