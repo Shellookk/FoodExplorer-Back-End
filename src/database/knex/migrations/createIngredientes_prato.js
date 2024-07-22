@@ -5,7 +5,7 @@ exports.up = function(knex) {
       
       table.foreign('plate_id').references('id').inTable('plates').onDelete('CASCADE');
       table.foreign('ingredient_id').references('id').inTable('ingredients').onDelete('CASCADE');
-          });
+    });
   };
   
   exports.down = function(knex) {

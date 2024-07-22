@@ -113,13 +113,25 @@ class PlatesController{
     async delete(request, response){
         const { id } = request.params
 
-        if (!id) {
-            throw new AppError("ID do prato não fornecido!", 400);
+        const plate = await knex('plates').where({ id }).first();
+    
+        if (!plate) {
+            throw new AppError("Produto não encontrado!", 404);
+        }
+        await knex('plates').where({ id }).delete()
+
+        // Exclui ingredientes que não são mais referenciados por nenhum prato
+        const orphanIngredients = await knex('ingredients')
+        .leftJoin('ingredients_plate', 'ingredients.id', 'ingredients_plate.ingredient_id')
+        .whereNull('ingredients_plate.ingredient_id')
+        .select('ingredients.id');
+
+        if (orphanIngredients.length > 0) {
+            const orphanIngredientIds = orphanIngredients.map(ingredient => ingredient.id);
+            await knex('ingredients').whereIn('id', orphanIngredientIds).delete();
         }
 
-        await knex("plates").where({ id }).delete()
-
-        return response.status(200).json()
+        return response.status(200).json({ message: "Prato excluído com sucesso" })
 
     }
     //mostrar todos os pratos
